@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+        <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="right"
+        android:background = "#f000000f"
+        >
+     
+            <Button
+                android:id="@+id/Refresh"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="새로 고침" />
+
+            <Button
+                android:id="@+id/Tolist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="리스트 보기" />
+            
+        </LinearLayout>
+        
+        <net.daum.mf.map.api.MapView
+		    android:id="@+id/daumMapView"
+		    android:layout_width="match_parent" 
+		    android:layout_height="match_parent" />
+    
+    
+</LinearLayout>
