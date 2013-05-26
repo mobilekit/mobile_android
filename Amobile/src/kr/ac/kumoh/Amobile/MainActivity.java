@@ -126,9 +126,17 @@ MapView.POIItemEventListener
 	@Override
 	public void onCalloutBalloonOfPOIItemTouched(MapView arg0, MapPOIItem arg1) {
 		// TODO Auto-generated method stub
-	   Uri uri = Uri.parse("http://www.naver.com");
-	   Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-	   startActivity(intent);		
+		String[] url = new String[product_cnt];  //"http://www.naver.com" ;
+		int tag;
+		
+		for(int i=0; i<product_cnt; i++)
+			url[i] = db_url[i];			
+		
+		tag=arg1.getTag();
+		
+		Uri uri = Uri.parse(url[tag-1]);
+		Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+		startActivity(intent);		
 	}
 	
 	@Override
@@ -172,7 +180,6 @@ MapView.POIItemEventListener
 		String[] name = new String[product_cnt];// "ÀÌÁ¤µ· µÅ¾ßÁö 100%ÇÒÀÎ ÄíÆù";
 		double[] p_lati = new double[product_cnt];//37.53737528;
 		double[] p_longti = new double[product_cnt];//127.00557633;
-		String[] url = new String[product_cnt];  //"http://www.naver.com" ;
 		
 		MapPOIItem[] 
 		poiItem = new MapPOIItem[product_cnt];
@@ -181,10 +188,10 @@ MapView.POIItemEventListener
 			name[i] = db_name[i];
 			p_lati[i] = db_p_lati[i];
 			p_longti[i] = db_p_longti[i];
-			url[i] = db_url[i];			
-		
+			
 			poiItem[i]= new MapPOIItem();
 			poiItem[i].setItemName(name[i]);
+			poiItem[i].setTag(1+i);
 			poiItem[i].setMapPoint(MapPoint.mapPointWithGeoCoord(p_lati[i],p_longti[i]));
 			poiItem[i].setMarkerType(MapPOIItem.MarkerType.BluePin);
 			poiItem[i].setShowAnimationType(MapPOIItem.ShowAnimationType.DropFromHeaven);
