@@ -18,9 +18,10 @@ public class ListActivity extends Activity {
 		Button tomap = (Button) findViewById(R.id.Tomap);
 		tomap.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				Intent intent = new Intent(ListActivity.this,
-						MainActivity.class);
-				startActivity(intent);
+				//Intent intent = new Intent(ListActivity.this,
+				//		MainActivity.class);
+				//startActivity(intent);
+				finish();
 			}
 		});//새로 만들어야 되는게 아니라 이전 장소로 가야됨..
 	}
