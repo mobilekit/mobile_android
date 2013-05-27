@@ -11,13 +11,14 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
 public class MainActivity extends Activity implements
 //MapView.OpenAPIKeyAuthenticationResultListener
-//MapView.CurrentLocationEventListener
+MapView.CurrentLocationEventListener,
 MapView.MapViewEventListener,
 MapView.POIItemEventListener
 {	
@@ -41,6 +42,8 @@ MapView.POIItemEventListener
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+	
+		
 		
 			
 		mapView = (MapView) findViewById(R.id.daumMapView);
@@ -50,6 +53,9 @@ MapView.POIItemEventListener
 		// mapView.setCurrentLocationEventListener(this);
 		mapView.setPOIItemEventListener(this);
 		mapView.setMapType(MapView.MapType.Standard);
+		
+		mapView.setCurrentLocationEventListener(this);
+		mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithHeading);
 		
 		
 		///////////////////db 값 임의 초기화////////////////////
@@ -84,11 +90,11 @@ MapView.POIItemEventListener
 		});
 		
 		
-		//////////////처음 자신의 위치 띄우기////////////////////
-		this.user_location();
-		
 		///////////////////마커 띄우기//////////////////////
 		this.show_mark(product_cnt);
+		
+		//////////////처음 자신의 위치 띄우기////////////////////
+		this.user_location();
 		
 	}
 
@@ -163,13 +169,16 @@ MapView.POIItemEventListener
 			public void onLocationChanged(Location location){ 
 				lati = location.getLatitude();
 				longti = location.getLongitude();
-				if (set==false){
+				//if (set==false){
 					mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(lati,longti),  true);
 					set = true;				
-				}
+			//	}
 			}
 			public void onStatusChanged(String provider, int status, Bundle extras){}
-			public void onProviderEnabled(String provider){}
+			public void onProviderEnabled(String provider){
+				
+				
+			}
 			public void onProviderDisabled(String provider){}
 		};		
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
@@ -198,7 +207,33 @@ MapView.POIItemEventListener
 			poiItem[i].setShowCalloutBalloonOnTouch(true);
 			mapView.addPOIItem(poiItem[i]);	
 		}
-		mapView.fitMapViewAreaToShowAllPOIItems();			
+		mapView.fitMapViewAreaToShowAllPOIItems();
+		
 	}
+
+	@Override
+	public void onCurrentLocationDeviceHeadingUpdate(MapView arg0, float arg1) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onCurrentLocationUpdate(MapView arg0, MapPoint arg1, float arg2) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onCurrentLocationUpdateCancelled(MapView arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onCurrentLocationUpdateFailed(MapView arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	
 }
