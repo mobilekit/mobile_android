@@ -19,11 +19,11 @@ import android.widget.Button;
 public class MainActivity extends Activity implements
 //MapView.OpenAPIKeyAuthenticationResultListener
 MapView.CurrentLocationEventListener,
-MapView.MapViewEventListener
-//MapView.POIItemEventListener
+MapView.MapViewEventListener,
+MapView.POIItemEventListener
 {	
 	private MapView mapView;
-	private Button tolist;
+	private Button tolist, mylocation;
 	private LocationManager locationManager;
 	private LocationListener locationListener;
 	private double lati, longti;
@@ -42,22 +42,18 @@ MapView.MapViewEventListener
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-	
-		
-		
+		//requestWindowFeature(Window.FEATURE_NO_TITLE);
+			
 			
 		mapView = (MapView) findViewById(R.id.daumMapView);
 		mapView.setDaumMapApiKey("f401d2bb5e8f15928c99c68e0a71f43ea29fb2e0");
 		mapView.setMapViewEventListener(this);
 		// mapView.setOpenAPIKeyAuthenticationResultListener(this);
 		// mapView.setCurrentLocationEventListener(this);
-		
-		
-		/////mapView.setPOIItemEventListener(this);
+		mapView.setPOIItemEventListener(this);
 		mapView.setMapType(MapView.MapType.Standard);
 		
-		////mapView.setCurrentLocationEventListener(this);
-		
+		mapView.setCurrentLocationEventListener(this);
 		
 		///////////////////db 값 임의 초기화////////////////////
 		product_cnt=3;
@@ -85,22 +81,27 @@ MapView.MapViewEventListener
 		tolist = (Button) findViewById(R.id.Tolist);
 		tolist.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-
-				mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithHeading);
 				
-				
-				//Intent intent = new Intent(MainActivity.this,ListActivity.class);
-				//startActivity(intent);
+				Intent intent = new Intent(MainActivity.this,ListActivity.class);
+				startActivity(intent);
 			}
 		});
 		
-		/*
+		mylocation = (Button) findViewById(R.id.myLocation);
+		mylocation.setOnClickListener(new OnClickListener(){
+			@Override
+			public void onClick(View v) {
+				mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading);
+			}
+		});
+		
+			
 		///////////////////마커 띄우기//////////////////////
 		this.show_mark(product_cnt);
 		
 		//////////////처음 자신의 위치 띄우기////////////////////
 		this.user_location();
-		*/
+		
 		
 		
 	}
@@ -133,7 +134,7 @@ MapView.MapViewEventListener
 
 	}
 	/////////////////////////////////////////////////////
-	/*
+	
 	
 	/////////////////////마커 관련 //////////////////////////////
 	@Override
@@ -165,7 +166,7 @@ MapView.MapViewEventListener
 	}
 	///////////////////////////////////////////////////////////
 	
-
+	
 	public void user_location(){
 		//이전 gps 주소 known
 
@@ -176,10 +177,10 @@ MapView.MapViewEventListener
 			public void onLocationChanged(Location location){ 
 				lati = location.getLatitude();
 				longti = location.getLongitude();
-				//if (set==false){
+				if (set==false){
 					mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(lati,longti),  true);
 					set = true;				
-			//	}
+				}
 			}
 			public void onStatusChanged(String provider, int status, Bundle extras){}
 			public void onProviderEnabled(String provider){
@@ -215,8 +216,8 @@ MapView.MapViewEventListener
 			mapView.addPOIItem(poiItem[i]);	
 		}
 		mapView.fitMapViewAreaToShowAllPOIItems();
-		
-	}*/
+
+	}
 	@Override
 	public void onCurrentLocationUpdate(MapView mapView, MapPoint currentLocation, float accuracyInMeters) {
 	  MapPoint.GeoCoordinate mapPointGeo = currentLocation.getMapPointGeoCoord();
