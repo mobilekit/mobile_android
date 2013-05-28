@@ -18,7 +18,7 @@ import android.widget.Button;
 
 public class MainActivity extends Activity implements
 //MapView.OpenAPIKeyAuthenticationResultListener
-MapView.CurrentLocationEventListener,
+//MapView.CurrentLocationEventListener,
 MapView.MapViewEventListener,
 MapView.POIItemEventListener
 {	
@@ -27,7 +27,7 @@ MapView.POIItemEventListener
 	private LocationManager locationManager;
 	private LocationListener locationListener;
 	private double lati, longti;
-	private boolean set = false;
+	private boolean goto_user = false;
 	MapPOIItem[] poiItem ;
 	
 	//// marker 관련 임시 변수//
@@ -52,8 +52,6 @@ MapView.POIItemEventListener
 		// mapView.setCurrentLocationEventListener(this);
 		mapView.setPOIItemEventListener(this);
 		mapView.setMapType(MapView.MapType.Standard);
-		
-		mapView.setCurrentLocationEventListener(this);
 		
 		///////////////////db 값 임의 초기화////////////////////
 		product_cnt=3;
@@ -91,19 +89,17 @@ MapView.POIItemEventListener
 		mylocation.setOnClickListener(new OnClickListener(){
 			@Override
 			public void onClick(View v) {
-				mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading);
+				//mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading);
+				goto_user =false;
+				user_location();								
 			}
 		});
-		
-			
 		///////////////////마커 띄우기//////////////////////
 		this.show_mark(product_cnt);
 		
 		//////////////처음 자신의 위치 띄우기////////////////////
+
 		this.user_location();
-		
-		
-		
 	}
 
 	///////////////////////mapview 관련 /////////////////////////////
@@ -177,20 +173,19 @@ MapView.POIItemEventListener
 			public void onLocationChanged(Location location){ 
 				lati = location.getLatitude();
 				longti = location.getLongitude();
-				if (set==false){
+				if (goto_user==false){
 					mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(lati,longti),  true);
-					set = true;				
+					goto_user = true;
 				}
 			}
 			public void onStatusChanged(String provider, int status, Bundle extras){}
-			public void onProviderEnabled(String provider){
-				
-				
+			public void onProviderEnabled(String provider){				
 			}
 			public void onProviderDisabled(String provider){}
-		};		
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+		};	
+		
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, locationListener);
+		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 10, locationListener);		
 	}
 	
 	public void show_mark(int product_cnt){
@@ -213,13 +208,30 @@ MapView.POIItemEventListener
 			poiItem[i].setMarkerType(MapPOIItem.MarkerType.BluePin);
 			poiItem[i].setShowAnimationType(MapPOIItem.ShowAnimationType.DropFromHeaven);
 			poiItem[i].setShowCalloutBalloonOnTouch(true);
-			mapView.addPOIItem(poiItem[i]);	
+			mapView.addPOIItem(poiItem[i]);			
 		}
 		mapView.fitMapViewAreaToShowAllPOIItems();
-
+			
 	}
+	
+	/*
+	public void user_marker(double lati, double longti){
+		MapPOIItem poi_user = new MapPOIItem();
+		
+		poi_user.setItemName("현위치");
+		//poiItem.setUserObject(String.format("item%d", 2));
+		poi_user.setMapPoint(MapPoint.mapPointWithGeoCoord(lati,longti));
+		poi_user.setMarkerType(MapPOIItem.MarkerType.CustomImage);
+		poi_user.setShowAnimationType(MapPOIItem.ShowAnimationType.SpringFromGround);
+		poi_user.setCustomImageResourceId(R.drawable.user);
+		//poiItem.setCustomImageAnchorPointOffset(new MapPOIItem.ImageOffset(22,0));
+		//poiItem.setShowCalloutBalloonOnTouch(true);
+		mapView.addPOIItem(poi_user); 
+		
+	}*/
+	/*
 	@Override
-	public void onCurrentLocationUpdate(MapView mapView, MapPoint currentLocation, float accuracyInMeters) {
+		public void onCurrentLocationUpdate(MapView mapView, MapPoint currentLocation, float accuracyInMeters) {
 	  MapPoint.GeoCoordinate mapPointGeo = currentLocation.getMapPointGeoCoord();
 	  
 	  Log.i("MainActivity", String.format("MapView onCurrentLocationUpdate (%f,%f) accuracy (%f)", 
@@ -240,8 +252,6 @@ MapView.POIItemEventListener
 	public void onCurrentLocationUpdateCancelled(MapView arg0) {
 		// TODO Auto-generated method stub
 		
-	}
-
-
+	}*/
 	
 }
