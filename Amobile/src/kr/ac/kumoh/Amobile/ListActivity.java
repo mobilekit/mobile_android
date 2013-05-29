@@ -2,7 +2,6 @@ package kr.ac.kumoh.Amobile;
 
 import android.os.Bundle;
 import android.app.Activity;
-import android.content.Intent;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -16,7 +15,6 @@ public class ListActivity extends Activity {
 		setContentView(R.layout.activity_list);
 		
 		
-		
 		Button tomap = (Button) findViewById(R.id.Tomap);
 		tomap.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
@@ -25,6 +23,7 @@ public class ListActivity extends Activity {
 		});
 	}
 
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
