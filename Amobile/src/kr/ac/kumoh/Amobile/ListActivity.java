@@ -15,6 +15,7 @@ import android.widget.Toast;
 public class ListActivity extends Activity {
 
 	private ArrayList<Data> data;
+	
 	private ArrayAdapter<Data> adapter;
 	private ListView listView;
 	
@@ -22,27 +23,27 @@ public class ListActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_list);		
-
-		//액티비티 데이터 교환
-		Intent intent = getIntent();
-		data = intent.getParcelableArrayListExtra("data");
-		
-		for(int i= 0 ; i < data.size(); i++)
-			Toast.makeText(this, data.get(i).getname() +
-					" "+ data.get(i).geturl(), Toast.LENGTH_SHORT).show();
-		
-	/*
-		adapter = new ArrayAdapter<Data>(this, R.layout.datalist, data);
-		listView = (ListView)findViewById(R.id.ListView1);
-		listView.setAdapter(adapter);
-	*/	
-			
+		//////////////////button////////////////////////
 		Button tomap = (Button) findViewById(R.id.Tomap);
 		tomap.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				finish();
 			}
 		});
+		////////////////////////////////////////////////
 		
+		////////////////액티비티 데이터 교환///////////////////
+		Intent intent = getIntent();
+		data = intent.getParcelableArrayListExtra("data");
+		
+		for(int i= 0 ; i < data.size(); i++)
+			Toast.makeText(this, data.get(i).getname() +
+					" "+ data.get(i).geturl(), Toast.LENGTH_SHORT).show();
+	/*
+		adapter = new ArrayAdapter<Data>(this, R.layout.datalist, data);
+		listView = (ListView)findViewById(R.id.ListView1);
+		listView.setAdapter(adapter);
+	*/	
+					
 	}
 }
