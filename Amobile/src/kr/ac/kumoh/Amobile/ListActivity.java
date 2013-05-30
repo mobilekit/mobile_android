@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.content.Intent;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -16,15 +17,13 @@ public class ListActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_list);
-	/*	
-		if(savedInstanceState ==null){
-			data = new
-		}
-		else{
-			
-			
-		}
-		*/
+		
+		//액티비티 데이터 교환
+		Intent intent = getIntent();
+		data = intent.getParcelableArrayListExtra("data");
+		
+		
+		
 		
 		Button tomap = (Button) findViewById(R.id.Tomap);
 		tomap.setOnClickListener(new OnClickListener() {

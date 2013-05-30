@@ -57,6 +57,8 @@ MapView.POIItemEventListener
 		tolist.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				Intent intent = new Intent(MainActivity.this,ListActivity.class);
+				//액티비티 데이터 교환
+				intent.putParcelableArrayListExtra("data", data);
 				startActivity(intent);
 			}
 		});
