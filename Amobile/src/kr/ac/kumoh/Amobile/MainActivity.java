@@ -1,5 +1,7 @@
 package kr.ac.kumoh.Amobile;
 
+import java.util.ArrayList;
+
 import net.daum.mf.map.api.MapPOIItem;
 import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapView;
@@ -31,7 +33,7 @@ MapView.POIItemEventListener
 	
 	//// marker 관련  변수//
 	private int product_cnt;
-	private Data[] data;
+	private ArrayList<Data> data;
 	private MapPOIItem[] poiItem ;
 	
 	
@@ -134,7 +136,7 @@ MapView.POIItemEventListener
 	/////////////////////마커 관련 //////////////////////////////
 	@Override
 	public void onCalloutBalloonOfPOIItemTouched(MapView arg0, MapPOIItem arg1) {
-		Uri uri = Uri.parse(data[arg1.getTag()].geturl());
+		Uri uri = Uri.parse(data.get(arg1.getTag()).geturl());
 		Intent intent = new Intent(Intent.ACTION_VIEW, uri);
 		startActivity(intent);
 	}
@@ -167,17 +169,33 @@ MapView.POIItemEventListener
 	
 	public void load_db(){
 		///////////////////db 값 임의 초기화////////////////////
-		product_cnt = 3;
 		
-		data = new Data[product_cnt];
+		data = new ArrayList<Data>();
+		Data p_data ;
 		
-		for(int i=0;i<product_cnt;i++)
-			data[i] = new Data();
-	
-		data[0].setdata("이정돈 돼야지 100%할인 쿠폰", "http://www.naver.com", 36.139042, 128.3968962);
-		data[1].setdata("파송송 닭닭닭 70% 할인 쿠폰", "http://www.daum.net", 36.1414065, 128.3962129);
-		data[2].setdata("더롹 50%할인 쿠폰", "http://www.google.com", 36.1396188, 128.3964415);
-
+		/*???
+		while(true){
+			p_data = new Data();
+			p_data.setdata(name, url, lati, longti);
+			data.add(p_data);
+		}
+		*/
+		
+		p_data = new Data();
+		p_data.setdata("이정돈 돼야지 100%할인 쿠폰", "http://www.naver.com", 36.139042, 128.3968962);
+		data.add(p_data);
+		
+		p_data = new Data();
+		p_data.setdata("파송송 닭닭닭 70% 할인 쿠폰", "http://www.daum.net", 36.1414065, 128.3962129);
+		data.add(p_data);
+		
+		p_data = new Data();
+		p_data.setdata("더롹 50%할인 쿠폰", "http://www.google.com", 36.1396188, 128.3964415);
+		data.add(p_data);
+		
+		product_cnt = data.size();		
+		
+		
 		/*db 갯수 세기 방법 추가
 		product_cnt = 100;//순차적으로 cnt or 데이터 가져오기전에 		
 		data = new Data[product_cnt];
@@ -195,8 +213,8 @@ MapView.POIItemEventListener
 		
 		for(int i=0; i<product_cnt; i++){
 			poiItem[i] = new MapPOIItem();
-			poiItem[i].setItemName(data[i].getname());
-			poiItem[i].setMapPoint(MapPoint.mapPointWithGeoCoord(data[i].getlati(),data[i].getlongti()));
+			poiItem[i].setItemName(data.get(i).getname());
+			poiItem[i].setMapPoint(MapPoint.mapPointWithGeoCoord(data.get(i).getlati(),data.get(i).getlongti()));
 			poiItem[i].setTag(i);		
 			mapView.addPOIItem(poiItem[i]);
 		}
