@@ -10,13 +10,16 @@ import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Toast;
 
 public class ListActivity extends Activity {
 
 	private ArrayList<Data> data;
 	
-	private ArrayAdapter<Data> adapter;
+	private ArrayList<String> dataname;
+	private ArrayList<String> dataurl;
+	//private ArrayAdapter<Data> adapter;
+	private ArrayAdapter<String> adapters1;
+	private ArrayAdapter<String> adapters2;
 	private ListView listView;
 	
 	@Override
@@ -36,14 +39,26 @@ public class ListActivity extends Activity {
 		Intent intent = getIntent();
 		data = intent.getParcelableArrayListExtra("data");
 		
+		dataname = new ArrayList<String>();
+		dataurl = new ArrayList<String>();
+		for(int i= 0 ; i < data.size(); i++){
+			dataname.add(data.get(i).getname());
+			dataurl.add(data.get(i).geturl());
+		}
+		
+		/*
 		for(int i= 0 ; i < data.size(); i++)
-			Toast.makeText(this, data.get(i).getname() +
-					" "+ data.get(i).geturl(), Toast.LENGTH_SHORT).show();
-	/*
-		adapter = new ArrayAdapter<Data>(this, R.layout.datalist, data);
+			Toast.makeText(this, dataname.get(i)
+				+" "+ dataurl.get(i), Toast.LENGTH_SHORT).show();
+				*/
+	
 		listView = (ListView)findViewById(R.id.ListView1);
-		listView.setAdapter(adapter);
-	*/	
-					
+		adapters1 = new ArrayAdapter<String>(this, R.layout.datalist,R.id.dataname, dataname);
+
+		adapters2 = new ArrayAdapter<String>(this, R.layout.datalist,R.id.dataurl, dataurl);
+		listView.setAdapter(adapters2);
+		
+	
 	}
 }
+
