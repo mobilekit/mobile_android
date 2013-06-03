@@ -1,16 +1,13 @@
 package kr.ac.kumoh.Amobile;
 
-import java.net.URL;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import net.daum.mf.map.api.MapPOIItem;
 import net.daum.mf.map.api.MapPoint;
@@ -23,6 +20,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -46,12 +44,14 @@ public class MainActivity extends Activity implements
 	private double mylati, mylongti;
 	private double lowlati, highlati;
 	private double lowlongti, highlongti;
-	private final double RANGE = 0.1;
+	private final double X_RANGE = 0.006;
+	private final double Y_RANGE = 0.006;
 
 	private int product_cnt;
 	private ArrayList<Data> data;
 
 	private MapPOIItem[] poiItem;
+	private JSONArray jsonArray;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -65,7 +65,6 @@ public class MainActivity extends Activity implements
 		// mapView.setCurrentLocationEventListener(this);
 		mapView.setPOIItemEventListener(this);
 		mapView.setMapType(MapView.MapType.Standard);
-
 		// //////////////////// button /////////////////////////
 		tolist = (Button) findViewById(R.id.Tolist);
 		tolist.setOnClickListener(new OnClickListener() {
@@ -106,13 +105,13 @@ public class MainActivity extends Activity implements
 				mylongti = location.getLongitude();
 				if (first_parsing == false) {
 					first_parsing = true;
-					xml_parsing(mylati, mylongti, RANGE);
-					show_mark();
-					lowlati = mylati - RANGE;
-					highlati = mylati + RANGE;
-					lowlongti = mylongti - RANGE;
-					highlongti = mylongti + RANGE;
-					mapView.setZoomLevel(0, true);
+					new GetJson().execute(mylati, mylongti);
+					//show_mark();
+					lowlati = mylati - X_RANGE;
+					highlati = mylati + X_RANGE;
+					lowlongti = mylongti - Y_RANGE;
+					highlongti = mylongti + Y_RANGE;
+					mapView.setZoomLevel(4, true);
 					user_location();
 				}
 			}
@@ -133,108 +132,87 @@ public class MainActivity extends Activity implements
 				LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
 	}
 
-	// ////////////////////////////////////////////////////////////////////////////////
+	private class GetJson extends AsyncTask<Object, String, JSONArray> {
+		@Override
+		protected JSONArray doInBackground(Object... arg0) {
+			// TODO Auto-generated method stub
+			try {
+				// Create a new HTTP Client
+				DefaultHttpClient defaultClient = new DefaultHttpClient();
+				// Setup the get request
+				HttpGet httpGetRequest = new HttpGet(
+						"http://202.31.139.172:9092/index.php/mobile2/json/"
+								+ Double.toString((Double) arg0[0]) + "/"
+								+ Double.toString((Double) arg0[1]) + "/"
+								+ Double.toString(X_RANGE) + "/"
+								+ Double.toString(Y_RANGE));
+				// Execute the request in the client
+				HttpResponse httpResponse = defaultClient
+						.execute(httpGetRequest);
+				// Grab the response
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(httpResponse.getEntity()
+								.getContent(), "UTF-8"));
+				String json = reader.readLine();
+				// Instantiate a JSON object from the request response
 
-	// ///////////////////////////////////user_function///////////////////////////////
-	public void user_location() {
-		mapView.setMapCenterPointAndZoomLevel(
-				MapPoint.mapPointWithGeoCoord(mylati, mylongti), 1, true);
+				jsonArray = new JSONArray(json);
+				return jsonArray;
+
+			} catch (Exception e) {
+				Log.e("log_tag", "Error in http connection " + e.toString());
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+		}
+
+		@Override
+		protected void onPostExecute(JSONArray jsonArray) {
+			super.onPostExecute(jsonArray);
+
+			if (jsonArray != null) {
+
+				product_cnt = jsonArray.length();
+				data = new ArrayList<Data>();
+
+				try {
+					for (int i = 0; i < product_cnt; i++) {
+						Data p_data = new Data();
+						p_data.setdata(
+								jsonArray.getJSONObject(i).getString("title2"),
+								jsonArray.getJSONObject(i).getString("href"),
+								jsonArray.getJSONObject(i).getString("img"),
+								jsonArray.getJSONObject(i).getString(
+										"pre_price"), jsonArray
+										.getJSONObject(i)
+										.getString("cur_price"), Double
+										.parseDouble(jsonArray.getJSONObject(i)
+												.getString("x")), Double
+										.parseDouble(jsonArray.getJSONObject(i)
+												.getString("y")));
+						data.add(p_data);
+					}
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				show_mark();
+			}
+		}
 	}
 
-	/*
-	 * public void load_data() { data = new ArrayList<Data>(); Data p_data;
-	 * p_data = new Data(); p_data.setdata("ÀÌÁ¤µ· µÅ¾ßÁö 100%ÇÒÀÎ ÄíÆù",
-	 * "http://www.naver.com", 36.139042, 128.3968962); data.add(p_data); p_data
-	 * = new Data(); p_data.setdata("ÆÄ¼Û¼Û ´ß´ß´ß 70% ÇÒÀÎ ÄíÆù", "http://www.daum.net",
-	 * 36.1414065, 128.3962129); data.add(p_data); p_data = new Data();
-	 * p_data.setdata("´õŽô 50%ÇÒÀÎ ÄíÆù", "http://www.google.com", 36.1396188,
-	 * 128.3964415); data.add(p_data);
-	 * 
-	 * product_cnt = data.size(); }
-	 */
-	public void xml_parsing(double lati, double longti, double range) {
-
-		String tmp_url;
-		tmp_url = ("http://202.31.139.172:9092/index.php/mobile/xml/"
-				+ Double.toString(lati) + "/" + Double.toString(longti) + "/"
-				+ Double.toString(range) + "/" + Double.toString(range));
-		// "http://202.31.139.172:9092/index.php/mobile1/xml/36.139042/128.3968962/0.05/0.05");
-
-		try {
-			URL url = new URL(tmp_url);
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			DocumentBuilder db = dbf.newDocumentBuilder();
-			Document doc = db.parse(new InputSource(url.openStream())); // xml
-																		// ¹®¼­ ÆÄ½Ì
-			doc.getDocumentElement().normalize();
-			NodeList nodeList = doc.getElementsByTagName("product");
-
-			product_cnt = nodeList.getLength();
-			// product_cnt = 10;
-			data = new ArrayList<Data>();
-			Data p_data;
-			// System.out.println(tmp_url);
-			// System.out.println(lati + "," + longti);
-
-			for (int i = 0; i < product_cnt; i++) {
-				p_data = new Data();
-
-				Node node = nodeList.item(i);
-
-				Element fstElmnt = (Element) node;
-
-				NodeList titleList = fstElmnt.getElementsByTagName("title2");
-				Element titleElement = (Element) titleList.item(0);
-				titleList = titleElement.getChildNodes();
-				
-				NodeList Price1List = fstElmnt.getElementsByTagName("pre_price");
-				Element Price1Element = (Element) Price1List.item(0);
-				Price1List = Price1Element.getChildNodes();
-				
-				NodeList Price2List = fstElmnt.getElementsByTagName("cur_price");
-				Element Price2Element = (Element) Price2List.item(0);
-				Price2List = Price2Element.getChildNodes();
-				
-				NodeList ImgList = fstElmnt.getElementsByTagName("img");
-				Element ImgElement = (Element) ImgList.item(0);
-				ImgList = ImgElement.getChildNodes();
-				
-
-				NodeList latiList = fstElmnt.getElementsByTagName("x");
-				Element latiElement = (Element) latiList.item(0);
-				latiList = latiElement.getChildNodes();
-
-				NodeList longtiList = fstElmnt.getElementsByTagName("y");
-				Element longtiElement = (Element) longtiList.item(0);
-				longtiList = longtiElement.getChildNodes();
-				
-				NodeList hrefList = fstElmnt.getElementsByTagName("href");
-				Element hrefElement = (Element) hrefList.item(0);
-				hrefList = hrefElement.getChildNodes();
-
-				//String name, String href, String img, String price1, String price2,
-				//double lati, double longti
-				
-				p_data.setdata(((Node) titleList.item(0)).getNodeValue(),
-						((Node) hrefList.item(0)).getNodeValue(),
-						((Node) ImgList.item(0)).getNodeValue(),
-						((Node) Price1List.item(0)).getNodeValue(),
-						((Node) Price2List.item(0)).getNodeValue(),
-						Double.parseDouble(((Node) latiList.item(0)).getNodeValue()),
-						Double.parseDouble(((Node) longtiList.item(0)).getNodeValue())
-						);
-				
-				
-				data.add(p_data);
-			}
-		} catch (Exception e) {
-			Log.e("log_tag", "Error in xml parsing " + e.toString());
-		}
+	public void user_location() {
+		mapView.setMapCenterPointAndZoomLevel(
+				MapPoint.mapPointWithGeoCoord(mylati, mylongti), 4, true);
 	}
 
 	public void show_mark() {
 		poiItem = new MapPOIItem[product_cnt];
-
+		mapView.removeAllPOIItems();
 		for (int i = 0; i < product_cnt; i++) {
 			poiItem[i] = new MapPOIItem();
 			poiItem[i].setItemName(data.get(i).getname());
@@ -243,6 +221,7 @@ public class MainActivity extends Activity implements
 			poiItem[i].setTag(i);
 			mapView.addPOIItem(poiItem[i]);
 		}
+
 		mapView.fitMapViewAreaToShowAllPOIItems();
 	}
 
@@ -257,15 +236,14 @@ public class MainActivity extends Activity implements
 
 			if (maplati < lowlati || maplati > highlati
 					|| maplongti < lowlongti || maplongti > highlongti) {
-				mapView.removeAllPOIItems();
-				xml_parsing(maplati, maplongti, RANGE);
-				show_mark();
-				lowlati = maplati - RANGE;
-				highlati = maplati + RANGE;
-				lowlongti = maplongti - RANGE;
-				highlongti = maplongti + RANGE;
-			}
 
+				new GetJson().execute(maplati, maplongti);
+				//show_mark();
+				lowlati = maplati - X_RANGE;
+				highlati = maplati + X_RANGE;
+				lowlongti = maplongti - Y_RANGE;
+				highlongti = maplongti + Y_RANGE;
+			}
 		}
 	}
 

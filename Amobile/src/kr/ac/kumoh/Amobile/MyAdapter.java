@@ -51,19 +51,10 @@ class MyAdapter extends ArrayAdapter<Data> {
 		if (convertView == null)
 			convertView = Inflater.inflate(layoutId, parent, false);
 
-		new GetImage().execute(data.getimg()
-				+ "?cmd=thumb&width=50&height=50&fit=false");
-		list_row_photo = (ImageView) convertView.findViewById(R.id.listimage);
+		new GetImage().execute(data.getimg(), data);
 
-		/*
-		 * 
-		 * 
-		 * 
-		 * 3 list_row_photo = (ImageView)
-		 * convertView.findViewById(R.id.listimage);
-		 * list_row_photo.setImageBitmap(BitmapFactory.decodeResource(this
-		 * .getContext().getResources(), R.drawable.ic_launcher));
-		 */
+		list_row_photo = (ImageView) convertView.findViewById(R.id.listimage);
+		list_row_photo.setImageBitmap(data.getbmp());
 
 		TextView dataname = (TextView) convertView.findViewById(R.id.dataname);
 		dataname.setText(data.getname());
@@ -77,33 +68,32 @@ class MyAdapter extends ArrayAdapter<Data> {
 		return convertView;
 	}
 
-	private class GetImage extends AsyncTask<String, String, Void> {
+	private class GetImage extends AsyncTask<String, Data, Void> {
 
 		InputStream is = null;
 
-		@Override
-		protected Void doInBackground(String... url) {
-			// TODO Auto-generated method stub
-
+		public void execute(String getimg, Data data) {
 			try {
 				HttpURLConnection connection = (HttpURLConnection) new URL(
-						url[0]).openConnection();
+						getimg).openConnection();
 				connection.connect();
 				is = connection.getInputStream();
 				imgBitmap = BitmapFactory.decodeStream(is);
 				is.close();
+				data.setbmp(imgBitmap);
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 
+		}
+
+		@Override
+		protected Void doInBackground(String... params) {
+			// TODO Auto-generated method stub
 			return null;
 		}
 
-		protected void onPostExecute(Void c) {
-
-			list_row_photo.setImageBitmap(imgBitmap);
-		}
 	}
 }
