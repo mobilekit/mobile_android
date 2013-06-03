@@ -4,61 +4,62 @@ import java.util.ArrayList;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 public class ListActivity extends Activity {
 
 	private ArrayList<Data> data;
-	
-	private ArrayList<String> dataname;
-	private ArrayList<String> dataurl;
-	//private ArrayAdapter<Data> adapter;
-	private ArrayAdapter<String> adapters1;
-	private ArrayAdapter<String> adapters2;
+	private MyAdapter adapter;
 	private ListView listView;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_list);		
-		//////////////////button////////////////////////
+		setContentView(R.layout.activity_list);
+
+		// ////////////////button////////////////////////
 		Button tomap = (Button) findViewById(R.id.Tomap);
 		tomap.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				finish();
 			}
 		});
-		////////////////////////////////////////////////
-		
-		////////////////액티비티 데이터 교환///////////////////
+		// //////////////////////////////////////////////
+
+		// //////////////액티비티 데이터 교환///////////////////
+
 		Intent intent = getIntent();
 		data = intent.getParcelableArrayListExtra("data");
-		
-		dataname = new ArrayList<String>();
-		dataurl = new ArrayList<String>();
-		for(int i= 0 ; i < data.size(); i++){
-			dataname.add(data.get(i).getname());
-			dataurl.add(data.get(i).geturl());
+/*
+		for (int i = 0; i < 5; i++) {
+			Toast.makeText(this, data.get(i).getname(), Toast.LENGTH_SHORT)
+					.show();
+			Toast.makeText(this, data.get(i).gethref(), Toast.LENGTH_SHORT)
+					.show();
+			Toast.makeText(this, data.get(i).getimg(), Toast.LENGTH_SHORT)
+					.show();
+			Toast.makeText(this, data.get(i).getprice1(), Toast.LENGTH_SHORT)
+					.show();
+			Toast.makeText(this, data.get(i).getprice2(), Toast.LENGTH_SHORT)
+					.show();
 		}
+*/
+		 listView = (ListView)findViewById(R.id.ListView1);
+		 adapter = new MyAdapter(this, R.layout.datalist, data);
+		 listView.setAdapter(adapter);
 		
-		/*
-		for(int i= 0 ; i < data.size(); i++)
-			Toast.makeText(this, dataname.get(i)
-				+" "+ dataurl.get(i), Toast.LENGTH_SHORT).show();
-				*/
-	
-		listView = (ListView)findViewById(R.id.ListView1);
-		adapters1 = new ArrayAdapter<String>(this, R.layout.datalist,R.id.dataname, dataname);
 
-		adapters2 = new ArrayAdapter<String>(this, R.layout.datalist,R.id.dataurl, dataurl);
-		listView.setAdapter(adapters2);
-		
-	
 	}
 }
-

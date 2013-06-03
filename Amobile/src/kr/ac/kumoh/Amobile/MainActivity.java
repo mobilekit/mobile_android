@@ -183,13 +183,22 @@ public class MainActivity extends Activity implements
 
 				Element fstElmnt = (Element) node;
 
-				NodeList titleList = fstElmnt.getElementsByTagName("title1");
+				NodeList titleList = fstElmnt.getElementsByTagName("title2");
 				Element titleElement = (Element) titleList.item(0);
 				titleList = titleElement.getChildNodes();
-
-				NodeList urlList = fstElmnt.getElementsByTagName("href");
-				Element urlElement = (Element) urlList.item(0);
-				urlList = urlElement.getChildNodes();
+				
+				NodeList Price1List = fstElmnt.getElementsByTagName("pre_price");
+				Element Price1Element = (Element) Price1List.item(0);
+				Price1List = Price1Element.getChildNodes();
+				
+				NodeList Price2List = fstElmnt.getElementsByTagName("cur_price");
+				Element Price2Element = (Element) Price2List.item(0);
+				Price2List = Price2Element.getChildNodes();
+				
+				NodeList ImgList = fstElmnt.getElementsByTagName("img");
+				Element ImgElement = (Element) ImgList.item(0);
+				ImgList = ImgElement.getChildNodes();
+				
 
 				NodeList latiList = fstElmnt.getElementsByTagName("x");
 				Element latiElement = (Element) latiList.item(0);
@@ -198,30 +207,25 @@ public class MainActivity extends Activity implements
 				NodeList longtiList = fstElmnt.getElementsByTagName("y");
 				Element longtiElement = (Element) longtiList.item(0);
 				longtiList = longtiElement.getChildNodes();
+				
+				NodeList hrefList = fstElmnt.getElementsByTagName("href");
+				Element hrefElement = (Element) hrefList.item(0);
+				hrefList = hrefElement.getChildNodes();
 
+				//String name, String href, String img, String price1, String price2,
+				//double lati, double longti
+				
 				p_data.setdata(((Node) titleList.item(0)).getNodeValue(),
-						((Node) urlList.item(0)).getNodeValue(), Double
-								.parseDouble(((Node) latiList.item(0))
-										.getNodeValue()), Double
-								.parseDouble(((Node) longtiList.item(0))
-										.getNodeValue()));
+						((Node) hrefList.item(0)).getNodeValue(),
+						((Node) ImgList.item(0)).getNodeValue(),
+						((Node) Price1List.item(0)).getNodeValue(),
+						((Node) Price2List.item(0)).getNodeValue(),
+						Double.parseDouble(((Node) latiList.item(0)).getNodeValue()),
+						Double.parseDouble(((Node) longtiList.item(0)).getNodeValue())
+						);
+				
+				
 				data.add(p_data);
-
-				// System.out.println(lati + "," + longti);
-
-				/*
-				 * System.out.println(((Node)titleList.item(0)).getNodeValue());
-				 * System.out.println(((Node)urlList.item(0)).getNodeValue());
-				 * System
-				 * .out.println(Double.parseDouble(((Node)latiList.item(0))
-				 * .getNodeValue()));
-				 * System.out.println(Double.parseDouble(((Node
-				 * )longtiList.item(0)).getNodeValue()));
-				 * System.out.println(((Node)latiList.item(0)).getNodeValue());
-				 * System
-				 * .out.println(((Node)longtiList.item(0)).getNodeValue());
-				 */
-
 			}
 		} catch (Exception e) {
 			Log.e("log_tag", "Error in xml parsing " + e.toString());
@@ -290,7 +294,7 @@ public class MainActivity extends Activity implements
 	// ///////////////////POIItemEventListener///////////////////
 	@Override
 	public void onCalloutBalloonOfPOIItemTouched(MapView arg0, MapPOIItem arg1) {
-		Uri uri = Uri.parse(data.get(arg1.getTag()).geturl());
+		Uri uri = Uri.parse(data.get(arg1.getTag()).gethref());
 		Intent intent = new Intent(Intent.ACTION_VIEW, uri);
 		startActivity(intent);
 	}
