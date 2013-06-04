@@ -44,8 +44,8 @@ public class MainActivity extends Activity implements
 	private double mylati, mylongti;
 	private double lowlati, highlati;
 	private double lowlongti, highlongti;
-	private final double X_RANGE = 0.006;
-	private final double Y_RANGE = 0.006;
+	private final double X_RANGE = 0.025;
+	private final double Y_RANGE = 0.025;
 
 	private int product_cnt;
 	private ArrayList<Data> data;
@@ -72,7 +72,6 @@ public class MainActivity extends Activity implements
 				if (first_parsing == true) {
 					Intent intent = new Intent(MainActivity.this,
 							ListActivity.class);
-					// 액티비티 데이터 교환
 					intent.putParcelableArrayListExtra("data", data);
 					startActivity(intent);
 				}
@@ -82,7 +81,7 @@ public class MainActivity extends Activity implements
 		mylocation.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				if (first_parsing == true) {
-					user_location();
+					user_location(mylati, mylongti);
 				}
 			}
 		});
@@ -104,15 +103,13 @@ public class MainActivity extends Activity implements
 				mylati = location.getLatitude();
 				mylongti = location.getLongitude();
 				if (first_parsing == false) {
+					mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(mylati, mylongti),6,false);		
 					first_parsing = true;
-					new GetJson().execute(mylati, mylongti);
-					//show_mark();
 					lowlati = mylati - X_RANGE;
 					highlati = mylati + X_RANGE;
 					lowlongti = mylongti - Y_RANGE;
 					highlongti = mylongti + Y_RANGE;
-					mapView.setZoomLevel(4, true);
-					user_location();
+					new GetJson().execute(mylati, mylongti);
 				}
 			}
 
@@ -144,8 +141,8 @@ public class MainActivity extends Activity implements
 						"http://202.31.139.172:9092/index.php/mobile2/json/"
 								+ Double.toString((Double) arg0[0]) + "/"
 								+ Double.toString((Double) arg0[1]) + "/"
-								+ Double.toString(X_RANGE) + "/"
-								+ Double.toString(Y_RANGE));
+								+ Double.toString(X_RANGE * 2) + "/"
+								+ Double.toString(Y_RANGE * 2));
 				// Execute the request in the client
 				HttpResponse httpResponse = defaultClient
 						.execute(httpGetRequest);
@@ -200,14 +197,17 @@ public class MainActivity extends Activity implements
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				MapPoint p = mapView.getMapCenterPoint();
+				int zoomlvl = mapView.getZoomLevel();
 				show_mark();
+				mapView.setMapCenterPointAndZoomLevel(p, zoomlvl, false);
 			}
 		}
 	}
 
-	public void user_location() {
-		mapView.setMapCenterPointAndZoomLevel(
-				MapPoint.mapPointWithGeoCoord(mylati, mylongti), 4, true);
+	public void user_location(double lati, double longti) {
+		mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(lati, longti),
+				true);
 	}
 
 	public void show_mark() {
@@ -221,7 +221,6 @@ public class MainActivity extends Activity implements
 			poiItem[i].setTag(i);
 			mapView.addPOIItem(poiItem[i]);
 		}
-
 		mapView.fitMapViewAreaToShowAllPOIItems();
 	}
 
@@ -236,13 +235,11 @@ public class MainActivity extends Activity implements
 
 			if (maplati < lowlati || maplati > highlati
 					|| maplongti < lowlongti || maplongti > highlongti) {
-
+				lowlati = maplati - X_RANGE ;
+				highlati = maplati + X_RANGE ;
+				lowlongti = maplongti - Y_RANGE ;
+				highlongti = maplongti + Y_RANGE ;
 				new GetJson().execute(maplati, maplongti);
-				//show_mark();
-				lowlati = maplati - X_RANGE;
-				highlati = maplati + X_RANGE;
-				lowlongti = maplongti - Y_RANGE;
-				highlongti = maplongti + Y_RANGE;
 			}
 		}
 	}
@@ -286,5 +283,4 @@ public class MainActivity extends Activity implements
 	public void onPOIItemSelected(MapView arg0, MapPOIItem arg1) {
 	}
 	// /////////////////////////////////////////////////////////
-
 }
