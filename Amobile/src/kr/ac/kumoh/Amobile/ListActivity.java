@@ -26,9 +26,13 @@ public class ListActivity extends Activity implements OnItemClickListener {
 
 		// ////////////////button////////////////////////
 		Button tomap = (Button) findViewById(R.id.Tomap);
+
 		tomap.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				finish();
+				Intent intent = new Intent(ListActivity.this,
+						MainActivity.class);
+				intent.addFlags(intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+				startActivity(intent);
 			}
 		});
 		// //////////////////////////////////////////////

@@ -24,7 +24,6 @@ class MyAdapter extends ArrayAdapter<Data> {
 	private int layoutId;
 	private ArrayList<Data> datalist;
 	private LayoutInflater Inflater;
-	private Bitmap imgBitmap = null;
 	private Data data;
 	private ImageView list_row_photo;
 
@@ -40,21 +39,18 @@ class MyAdapter extends ArrayAdapter<Data> {
 	@Override
 	public int getCount() {
 		return datalist.size();
-
 	}
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 
 		data = datalist.get(position);
-
+		
 		if (convertView == null)
 			convertView = Inflater.inflate(layoutId, parent, false);
 
-		new GetImage().execute(data.getimg(), data);
-
-		list_row_photo = (ImageView) convertView.findViewById(R.id.listimage);
-		list_row_photo.setImageBitmap(data.getbmp());
+		
+		new GetImage().execute(data, convertView);
 
 		TextView dataname = (TextView) convertView.findViewById(R.id.dataname);
 		dataname.setText(data.getname());
@@ -66,34 +62,36 @@ class MyAdapter extends ArrayAdapter<Data> {
 		price2.setText(data.getprice2());
 
 		return convertView;
+
 	}
 
-	private class GetImage extends AsyncTask<String, Data, Void> {
+	private class GetImage extends AsyncTask<Object, String, View> {
 
 		InputStream is = null;
+		Bitmap bmp = null;
 
-		public void execute(String getimg, Data data) {
+		@Override
+		protected View doInBackground(Object... url) {
+			// TODO Auto-generated method stub
 			try {
 				HttpURLConnection connection = (HttpURLConnection) new URL(
-						getimg).openConnection();
+						((Data) url[0]).getimg()).openConnection();
 				connection.connect();
 				is = connection.getInputStream();
-				imgBitmap = BitmapFactory.decodeStream(is);
+				bmp = BitmapFactory.decodeStream(is);
 				is.close();
-				data.setbmp(imgBitmap);
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-
+			return (View)url[1];
 		}
 
-		@Override
-		protected Void doInBackground(String... params) {
-			// TODO Auto-generated method stub
-			return null;
+		protected void onPostExecute(View c) {
+			list_row_photo = (ImageView) c.findViewById(R.id.listimage);
+			list_row_photo.setImageBitmap(bmp);
+			
 		}
-
 	}
 }

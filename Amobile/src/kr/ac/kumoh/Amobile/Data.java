@@ -1,6 +1,5 @@
 package kr.ac.kumoh.Amobile;
 
-import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -8,7 +7,6 @@ public class Data implements Parcelable {
 
 	private String name, href;
 	private String img, price1, price2;
-	private Bitmap bmp;
 	private double lati, longti;
 
 	public Data() {
@@ -63,13 +61,6 @@ public class Data implements Parcelable {
 	public double getlongti() {
 		return longti;
 	}
-	public void setbmp(Bitmap bmp){
-		this.bmp = bmp;
-	}
-	public Bitmap getbmp(){
-		return bmp;
-	}
-
 	@Override
 	public void writeToParcel(Parcel arg0, int arg1) {
 		arg0.writeString(name);

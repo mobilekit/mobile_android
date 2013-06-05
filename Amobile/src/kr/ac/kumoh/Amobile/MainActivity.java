@@ -72,6 +72,7 @@ public class MainActivity extends Activity implements
 				if (first_parsing == true) {
 					Intent intent = new Intent(MainActivity.this,
 							ListActivity.class);
+					intent.addFlags(intent.FLAG_ACTIVITY_REORDER_TO_FRONT); 
 					intent.putParcelableArrayListExtra("data", data);
 					startActivity(intent);
 				}
@@ -89,6 +90,8 @@ public class MainActivity extends Activity implements
 
 		// //////////////////location/////////////////////////
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+		
+		
 		criteria = new Criteria();
 		criteria.setAccuracy(Criteria.ACCURACY_FINE);
 		criteria.setAltitudeRequired(false);
@@ -102,13 +105,9 @@ public class MainActivity extends Activity implements
 			public void onLocationChanged(Location location) {
 				mylati = location.getLatitude();
 				mylongti = location.getLongitude();
-				if (first_parsing == false) {
-					mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(mylati, mylongti),6,false);		
+				if (first_parsing == false) {				
 					first_parsing = true;
-					lowlati = mylati - X_RANGE;
-					highlati = mylati + X_RANGE;
-					lowlongti = mylongti - Y_RANGE;
-					highlongti = mylongti + Y_RANGE;
+
 					new GetJson().execute(mylati, mylongti);
 				}
 			}
@@ -130,10 +129,17 @@ public class MainActivity extends Activity implements
 	}
 
 	private class GetJson extends AsyncTask<Object, String, JSONArray> {
+		
+		MapPoint p;
 		@Override
 		protected JSONArray doInBackground(Object... arg0) {
 			// TODO Auto-generated method stub
 			try {
+				p = MapPoint.mapPointWithGeoCoord((Double) arg0[0],(Double) arg0[1]);
+				lowlati = (Double)arg0[0] - X_RANGE;
+				highlati = (Double)arg0[0] + X_RANGE;
+				lowlongti = (Double)arg0[1] - Y_RANGE;
+				highlongti = (Double)arg0[1] + Y_RANGE;
 				// Create a new HTTP Client
 				DefaultHttpClient defaultClient = new DefaultHttpClient();
 				// Setup the get request
@@ -180,7 +186,7 @@ public class MainActivity extends Activity implements
 					for (int i = 0; i < product_cnt; i++) {
 						Data p_data = new Data();
 						p_data.setdata(
-								jsonArray.getJSONObject(i).getString("title2"),
+								jsonArray.getJSONObject(i).getString("title1"),
 								jsonArray.getJSONObject(i).getString("href"),
 								jsonArray.getJSONObject(i).getString("img"),
 								jsonArray.getJSONObject(i).getString(
@@ -197,7 +203,6 @@ public class MainActivity extends Activity implements
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				MapPoint p = mapView.getMapCenterPoint();
 				int zoomlvl = mapView.getZoomLevel();
 				show_mark();
 				mapView.setMapCenterPointAndZoomLevel(p, zoomlvl, false);
@@ -206,8 +211,7 @@ public class MainActivity extends Activity implements
 	}
 
 	public void user_location(double lati, double longti) {
-		mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(lati, longti),
-				true);
+		new GetJson().execute(lati, longti);
 	}
 
 	public void show_mark() {
@@ -235,10 +239,6 @@ public class MainActivity extends Activity implements
 
 			if (maplati < lowlati || maplati > highlati
 					|| maplongti < lowlongti || maplongti > highlongti) {
-				lowlati = maplati - X_RANGE ;
-				highlati = maplati + X_RANGE ;
-				lowlongti = maplongti - Y_RANGE ;
-				highlongti = maplongti + Y_RANGE ;
 				new GetJson().execute(maplati, maplongti);
 			}
 		}
