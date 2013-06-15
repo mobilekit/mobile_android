@@ -3,16 +3,18 @@ package kr.ac.kumoh.Amobile;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONArray;
-import org.json.JSONException;
+import org.json.*;
 
 import net.daum.mf.map.api.MapPOIItem;
 import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapView;
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Criteria;
@@ -22,10 +24,12 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.Toast;
 
 public class MainActivity extends Activity implements
 // MapView.OpenAPIKeyAuthenticationResultListener
@@ -44,14 +48,28 @@ public class MainActivity extends Activity implements
 	private double mylati, mylongti;
 	private double lowlati, highlati;
 	private double lowlongti, highlongti;
-	private final double X_RANGE = 0.025;
-	private final double Y_RANGE = 0.025;
+	private final double X_RANGE = 0.06;
+	private final double Y_RANGE = 0.06;
 
 	private int product_cnt;
 	private ArrayList<Data> data;
 
 	private MapPOIItem[] poiItem;
 	private JSONArray jsonArray;
+	
+	private ProgressDialog mPdProgress;
+	
+	private boolean isThreadStatus = false;
+	private int threadCnt = 0;
+	
+	GetJson getJson;
+	
+	//private Context mContext;
+	/*
+	 * (non-Javadoc)
+	 * @see android.app.Activity#onCreate(android.os.Bundle)
+	 */
+	
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -69,12 +87,42 @@ public class MainActivity extends Activity implements
 		tolist = (Button) findViewById(R.id.Tolist);
 		tolist.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				if (first_parsing == true) {
-					Intent intent = new Intent(MainActivity.this,
-							ListActivity.class);
+				
+				Log.e("null","null_error");
+				
+				if(threadCnt>1 && ListActivity.listActivity != null){
+					
+					threadCnt=1;
+					ListActivity.listActivity.finish();
+					
+					//ListActivity
+				}
+						
+				Log.e("null","null_error1");
+				
+				if (product_cnt == 0) {
+					
+					Log.e("log", "dialog");
+					
+					Toast toast = Toast.makeText(MainActivity.this, "현 지역에 데이터가 없습니다",	Toast.LENGTH_SHORT); 
+					toast.show(); 
+
+				} 
+				else if (first_parsing == true) {
+					
+					Log.e("click", "ACTIVITY pre_CREATE");
+					
+					Intent intent = new Intent(MainActivity.this, ListActivity.class);
+					// 占쏙옙티占쏙옙티 占쏙옙占쏙옙占쏙옙 占쏙옙환
+					
+					
+					
 					intent.addFlags(intent.FLAG_ACTIVITY_REORDER_TO_FRONT); 
+
 					intent.putParcelableArrayListExtra("data", data);
 					startActivity(intent);
+					
+					Log.e("click", "ACTIVITY after_CREATE");
 				}
 			}
 		});
@@ -82,33 +130,68 @@ public class MainActivity extends Activity implements
 		mylocation.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				if (first_parsing == true) {
-					user_location(mylati, mylongti);
+					user_location();
 				}
 			}
 		});
 		// /////////////////////////////////////////////////////
-
-		// //////////////////location/////////////////////////
+				// //////////////////location/////////////////////////
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		
-		
+		if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) == false) {
+			Toast.makeText(this, "GPS 사용을 체크해주세요.", Toast.LENGTH_SHORT).show();
+			startActivityForResult(new Intent(
+					android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS),
+					0);
+		}
+			
 		criteria = new Criteria();
 		criteria.setAccuracy(Criteria.ACCURACY_FINE);
 		criteria.setAltitudeRequired(false);
 		criteria.setBearingRequired(false);
 		criteria.setSpeedRequired(false);
-		criteria.setCostAllowed(true);// �����ڰ� ������ ����� �ΰ��Ҽ� �ִ��� ����.
+		criteria.setCostAllowed(true);// 占쏙옙占쏙옙微占�占쏙옙占쏙옙占쏙옙 占쏙옙占쏙옙占�占싸곤옙占쌀쇽옙 占쌍댐옙占쏙옙 占쏙옙占쏙옙.
 		criteria.setPowerRequirement(Criteria.POWER_LOW);
 		mygpsprovider = locationManager.getBestProvider(criteria, true);
 
 		locationListener = new LocationListener() {
 			public void onLocationChanged(Location location) {
+				Log.e("func_call","onLocationChanged");
 				mylati = location.getLatitude();
 				mylongti = location.getLongitude();
-				if (first_parsing == false) {				
+				if (first_parsing == false) {
 					first_parsing = true;
-
-					new GetJson().execute(mylati, mylongti);
+					mapView.setZoomLevel(6, false);
+					user_location();
+					
+					// xml_parsing(mylati, mylongti, RANGE);
+					
+					Log.e("json","pre_excute");
+					
+					//show_mark();
+					
+					lowlati = mylati - X_RANGE;
+					highlati = mylati + X_RANGE;
+					lowlongti = mylongti - Y_RANGE;
+					highlongti = mylongti + Y_RANGE;
+					
+					getJson = new GetJson();
+					getJson.execute(mylati,mylongti);
+					
+					Handler handler = new Handler();
+					handler.postDelayed(new Runnable()
+					{
+					  @Override
+					  public void run() {
+					      if ( getJson.getStatus() == AsyncTask.Status.RUNNING ){
+					    	  getJson.cancel(true);
+					    	  mPdProgress.dismiss();
+					    	  Toast toast = Toast.makeText(MainActivity.this, "네트워크가 불안정합니다",	Toast.LENGTH_SHORT); 
+					    	  toast.show(); 
+					    	  
+					      }
+					  }
+					}, 7000 );
+					
 				}
 			}
 
@@ -128,95 +211,139 @@ public class MainActivity extends Activity implements
 				LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
 	}
 
+	
 	private class GetJson extends AsyncTask<Object, String, JSONArray> {
 		
-		MapPoint p;
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			Log.e("func_call", "onPreExecute");
+			
+			isThreadStatus = true;
+			
+			threadCnt++;
+			
+			mPdProgress = new ProgressDialog(MainActivity.this);
+	 	    mPdProgress.setMessage("Loading...");
+	 	    mPdProgress.setIndeterminate(true);
+	 	    mPdProgress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+	 	    mPdProgress.setCancelable(false);
+			mPdProgress.show();
+		}
+		
 		@Override
 		protected JSONArray doInBackground(Object... arg0) {
 			// TODO Auto-generated method stub
 			try {
-				p = MapPoint.mapPointWithGeoCoord((Double) arg0[0],(Double) arg0[1]);
-				lowlati = (Double)arg0[0] - X_RANGE;
-				highlati = (Double)arg0[0] + X_RANGE;
-				lowlongti = (Double)arg0[1] - Y_RANGE;
-				highlongti = (Double)arg0[1] + Y_RANGE;
 				// Create a new HTTP Client
 				DefaultHttpClient defaultClient = new DefaultHttpClient();
 				// Setup the get request
-				HttpGet httpGetRequest = new HttpGet(
-						"http://202.31.139.172:9092/index.php/mobile2/json/"
-								+ Double.toString((Double) arg0[0]) + "/"
-								+ Double.toString((Double) arg0[1]) + "/"
-								+ Double.toString(X_RANGE * 2) + "/"
-								+ Double.toString(Y_RANGE * 2));
+				HttpGet httpGetRequest = new HttpGet("http://202.31.139.172:9092/index.php/mobile2/json/"
+						+ Double.toString((Double) arg0[0]) + "/" + Double.toString((Double) arg0[1]) + "/"
+						+ Double.toString(X_RANGE) + "/" + Double.toString(Y_RANGE));
+				
 				// Execute the request in the client
-				HttpResponse httpResponse = defaultClient
-						.execute(httpGetRequest);
+				HttpResponse httpResponse = defaultClient.execute(httpGetRequest);
 				// Grab the response
-				BufferedReader reader = new BufferedReader(
-						new InputStreamReader(httpResponse.getEntity()
-								.getContent(), "UTF-8"));
+				BufferedReader reader = new BufferedReader(new InputStreamReader(httpResponse.getEntity().getContent(), "UTF-8"));
 				String json = reader.readLine();
 				// Instantiate a JSON object from the request response
-
+				//JSONObject jsonObject = new JSONObject(json);
 				jsonArray = new JSONArray(json);
+				
+				//Log.e("json", json.toString());
+				
+				//Log.e("json", jsonArray.length() + "");
+				
+				/*
+				 *
+				 */
+
 				return jsonArray;
 
 			} catch (Exception e) {
 				Log.e("log_tag", "Error in http connection " + e.toString());
 			}
+
 			return null;
+
 		}
 
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-		}
-
-		@Override
+		
+		
+		 @Override
 		protected void onPostExecute(JSONArray jsonArray) {
 			super.onPostExecute(jsonArray);
-
-			if (jsonArray != null) {
-
+			Log.e("func_call", "onPostExecute");	
+			//if (jsonArray != null && jsonArray.length() != 0) {
+				//Log.d("ASYNC", "result = " + jsonArray);
+				//Log.e("json", jsonArray.length() + "");
 				product_cnt = jsonArray.length();
+				data = null;
 				data = new ArrayList<Data>();
-
+				Log.e("product", product_cnt + "" );
+				//Log.e("cnt","product")
+				
 				try {
-					for (int i = 0; i < product_cnt; i++) {
+					for(int i=0; i<product_cnt; i++)
+					{
 						Data p_data = new Data();
 						p_data.setdata(
 								jsonArray.getJSONObject(i).getString("title1"),
 								jsonArray.getJSONObject(i).getString("href"),
 								jsonArray.getJSONObject(i).getString("img"),
-								jsonArray.getJSONObject(i).getString(
-										"pre_price"), jsonArray
-										.getJSONObject(i)
-										.getString("cur_price"), Double
-										.parseDouble(jsonArray.getJSONObject(i)
-												.getString("x")), Double
-										.parseDouble(jsonArray.getJSONObject(i)
-												.getString("y")));
+								jsonArray.getJSONObject(i).getString("pre_price"),
+								jsonArray.getJSONObject(i).getString("cur_price"), 
+								Double.parseDouble( jsonArray.getJSONObject(i).getString("x") ), 
+								Double.parseDouble( jsonArray.getJSONObject(i).getString("y") ) 
+								);
+
 						data.add(p_data);
+						
 					}
+					
+					MapPoint p = mapView.getMapCenterPoint();
+					int zoomlvl = mapView.getZoomLevel();
+					show_mark();
+					mapView.setMapCenterPointAndZoomLevel(p, zoomlvl, false);
+					
+					
+					//show_mark();
+					//mapView.setZoomLevel(1, true);
+					
 				} catch (JSONException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				int zoomlvl = mapView.getZoomLevel();
-				show_mark();
-				mapView.setMapCenterPointAndZoomLevel(p, zoomlvl, false);
-			}
+				
+				
+				
+			//}
+			
+			
+			mPdProgress.dismiss();
+			isThreadStatus = false;
+
 		}
+
 	}
 
-	public void user_location(double lati, double longti) {
-		new GetJson().execute(lati, longti);
+	// ////////////////////////////////////////////////////////////////////////////////
+
+	// ///////////////////////////////////user_function///////////////////////////////
+	public void user_location() {
+		Log.e("func_call","user_location");
+		mapView.setMapCenterPoint(
+				MapPoint.mapPointWithGeoCoord(mylati, mylongti), true);
 	}
 
 	public void show_mark() {
+		Log.e("func_call","show_mark");
 		poiItem = new MapPOIItem[product_cnt];
 		mapView.removeAllPOIItems();
+		
+		//Log.e("product_cnt",product_cnt + "");
+		
 		for (int i = 0; i < product_cnt; i++) {
 			poiItem[i] = new MapPOIItem();
 			poiItem[i].setItemName(data.get(i).getname());
@@ -225,7 +352,25 @@ public class MainActivity extends Activity implements
 			poiItem[i].setTag(i);
 			mapView.addPOIItem(poiItem[i]);
 		}
-		mapView.fitMapViewAreaToShowAllPOIItems();
+		
+		user_marker(mylati, mylongti);	 ////user location marker 
+
+		mapView.fitMapViewAreaToShowAllPOIItems(); 
+	}	
+
+	public void user_marker(double lati, double longti){  /// user location marker 
+		MapPOIItem poi_user = new MapPOIItem(); 
+
+		poi_user.setItemName("현위치"); 
+		//poiItem.setUserObject(String.format("item%d", 2)); 
+		poi_user.setMapPoint(MapPoint.mapPointWithGeoCoord(lati,longti)); 
+		poi_user.setMarkerType(MapPOIItem.MarkerType.CustomImage); 
+		poi_user.setShowAnimationType(MapPOIItem.ShowAnimationType.SpringFromGround); 
+		poi_user.setCustomImageResourceId(R.drawable.user); 
+		//poiItem.setCustomImageAnchorPointOffset(new MapPOIItem.ImageOffset(22,0)); 
+		poi_user.setShowCalloutBalloonOnTouch(false); 
+		mapView.addPOIItem(poi_user); 
+
 	}
 
 	// /////////////////////////////////////////////////////////////////
@@ -233,14 +378,24 @@ public class MainActivity extends Activity implements
 	// /////////////////MapView.MapViewEventListener///////////////////
 	@Override
 	public void onMapViewCenterPointMoved(MapView arg0, MapPoint arg1) {
+		Log.e("func_call","onMapViewCenterPointMoved");
 		if (first_parsing == true) {
 			double maplati = arg1.getMapPointGeoCoord().latitude;
 			double maplongti = arg1.getMapPointGeoCoord().longitude;
 
 			if (maplati < lowlati || maplati > highlati
 					|| maplongti < lowlongti || maplongti > highlongti) {
-				new GetJson().execute(maplati, maplongti);
+				lowlati = maplati - X_RANGE ;
+				highlati = maplati + X_RANGE ;
+				lowlongti = maplongti - Y_RANGE ;
+				highlongti = maplongti + Y_RANGE ;
+				Log.e("func_call","getjson");
+				
+				if(isThreadStatus == false)	
+					new GetJson().execute(maplati, maplongti);
+				
 			}
+
 		}
 	}
 
@@ -283,4 +438,7 @@ public class MainActivity extends Activity implements
 	public void onPOIItemSelected(MapView arg0, MapPOIItem arg1) {
 	}
 	// /////////////////////////////////////////////////////////
+
+	
+	
 }
