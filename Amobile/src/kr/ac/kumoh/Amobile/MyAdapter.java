@@ -8,10 +8,8 @@ import java.net.URL;
 import java.util.ArrayList;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.util.*;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,11 +23,6 @@ class MyAdapter extends ArrayAdapter<Data> {
 	private int layoutId;
 	private ArrayList<Data> datalist;
 	private LayoutInflater Inflater;
-	//private Bitmap imgBitmap = null;
-	private Data data;
-	private ImageView list_row_photo;
-	
-
 
 	public MyAdapter(Context _context, int _layoutId, ArrayList<Data> _Datalist) {
 		super(_context, _layoutId, _Datalist);
@@ -41,79 +34,62 @@ class MyAdapter extends ArrayAdapter<Data> {
 	}
 
 	@Override
-	public int getCount() {
-		return datalist.size();
-
-	}
-
-	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
+		class ViewHolder {
+			ImageView photo;
+			TextView name;
+			TextView price1;
+			TextView price2;
+		}
+		ViewHolder vh = null;
 
+		Data data;
 		data = datalist.get(position);
-		
-		Log.d("adapter", data.getimg());
-		
-		if (convertView == null)
+
+		if (convertView == null) {
+			vh = new ViewHolder();
 			convertView = Inflater.inflate(layoutId, parent, false);
-			//convertView = Inflater.inflate(layoutId, parent, false);
+			vh.photo = (ImageView) convertView
+					.findViewById(R.id.list_row_photo);
+			vh.name = (TextView) convertView.findViewById(R.id.list_row_txt_1);
+			vh.price1 = (TextView) convertView
+					.findViewById(R.id.list_row_price1);
+			vh.price2 = (TextView) convertView
+					.findViewById(R.id.list_row_price2);
+			convertView.setTag(vh);
+		} else {
+			vh = (ViewHolder) convertView.getTag();
+		}
 
-		//final String uniquePath = data.getimg();
-		
-		//list_row_photo = (ImageView) convertView.findViewById(R.id.list_row_photo);
-		//list_row_photo.setTag(data.getimg());
-		
-		//new GetImage().execute(data.getimg(),list_row_photo);
-		
-		new GetImage().execute(data, convertView); 
-		
+		if (data.getbmp() == null)
+			new GetImage().execute(data, vh.photo);
+		else
+			vh.photo.setImageBitmap(data.getbmp());
 
-		
-		
-		/*
-		 * 
-		 * 
-		 * 
-		 * 3 list_row_photo = (ImageView)
-		 * convertView.findViewById(R.id.listimage);
-		 * list_row_photo.setImageBitmap(BitmapFactory.decodeResource(this
-		 * .getContext().getResources(), R.drawable.ic_launcher));
-		 */
-
-		TextView dataname = (TextView) convertView.findViewById(R.id.list_row_txt_1);
-		dataname.setText(data.getname());
-		
-		Log.d("name", data.getname());
-		Log.d("name", data.getname().length() + "");
-
-		TextView price1 = (TextView) convertView.findViewById(R.id.list_row_price1);
-		price1.setText(data.getprice1());
-		
-		Log.d("price1", data.getprice1());
-
-		TextView price2 = (TextView) convertView.findViewById(R.id.list_row_price2);
-		price2.setText(data.getprice2());
-		
-		Log.d("price2", data.getprice2());
+		vh.name.setText(data.getname());
+		vh.price1.setText(data.getprice1());
+		vh.price2.setText(data.getprice2());
 
 		return convertView;
 	}
 
-	
 	private class GetImage extends AsyncTask<Object, String, View> {
 
 		InputStream is = null;
-		Bitmap bmp = null;
+		Data data = null;
 
 		@Override
 		protected View doInBackground(Object... url) {
 			// TODO Auto-generated method stub
 			try {
+				data = (Data) url[0];
 				HttpURLConnection connection = (HttpURLConnection) new URL(
-						((Data) url[0]).getimg()).openConnection();
+						data.getimg()).openConnection();
 				connection.connect();
 				is = connection.getInputStream();
-				bmp = BitmapFactory.decodeStream(is);
+				data.setbmp(BitmapFactory.decodeStream(is));
 				is.close();
+
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
@@ -122,56 +98,8 @@ class MyAdapter extends ArrayAdapter<Data> {
 			return (View) url[1];
 		}
 
-		protected void onPostExecute(View c) {
-			list_row_photo = (ImageView) c.findViewById(R.id.list_row_photo);
-			list_row_photo.setImageBitmap(bmp);
-
+		protected void onPostExecute(View photo) {
+			((ImageView) photo).setImageBitmap(data.getbmp());
 		}
 	}
-	
-	/*
-	private class GetImage extends AsyncTask<Object, String, View> {
-
-		InputStream is = null;
-		//
-		Bitmap bmp = null;
-		
-
-		@Override
-		protected ImageView doInBackground(Object... parm) {
-			// TODO Auto-generated method stub
-
-			//imagePath = (String) parm[0];
-			
-			try {
-				HttpURLConnection connection = (HttpURLConnection) new URL(
-						(String) parm[0]).openConnection();
-				connection.connect();
-				is = connection.getInputStream();
-				//imgBitmap = BitmapFactory.decodeStream(is);
-				imgBitmap1 = BitmapFactory.decodeStream(is);
-				
-				is.close();
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-
-			return (ImageView)parm[1];
-		}
-
-		protected void onPostExecute(ImageView c) {
-
-			if (((String)c.getTag()).equals(imagePath))
-			{ 
-				c.setImageBitmap(imgBitmap1);
-			}
-			
-			
-			
-			//list_row_photo.setImageBitmap(imgBitmap);
-		}
-	}
-	*/
 }

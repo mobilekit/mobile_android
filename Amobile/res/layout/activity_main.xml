@@ -1,48 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    
-
-    <LinearLayout
+    <net.daum.mf.map.api.MapView
+        android:id="@+id/daumMapView"
         android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <Button
+        android:id="@+id/Tolist"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="0.15"
-        android:orientation="vertical" >
-        
-        <FrameLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical" >
+        android:layout_gravity="right"
+        android:layout_marginRight="4pt"
+        android:layout_marginTop="4pt"
+        android:text="리스트" />
 
-            <net.daum.mf.map.api.MapView
-                android:id="@+id/daumMapView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+    <Button
+        android:id="@+id/myLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:layout_marginRight="4pt"
+        android:layout_marginTop="24pt"
+        android:text="내위치" />
 
-            <Button
-                android:id="@+id/Tolist"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right"
-                android:layout_marginRight="4pt"
-                android:layout_marginTop="4pt"
-                android:text="리스트" />
-
-            <Button
-                android:id="@+id/myLocation"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="left"
-                android:layout_marginLeft="4pt"
-                android:layout_marginTop="4pt"
-                android:text="내위치" />
-        </FrameLayout>
-
-    </LinearLayout>
-
-</LinearLayout>
+</FrameLayout>
