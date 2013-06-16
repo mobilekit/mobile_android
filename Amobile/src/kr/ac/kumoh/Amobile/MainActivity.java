@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.*;
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import net.daum.mf.map.api.MapPOIItem;
 import net.daum.mf.map.api.MapPoint;
@@ -31,8 +32,6 @@ import android.widget.Button;
 import android.widget.Toast;
 
 public class MainActivity extends Activity implements
-// MapView.OpenAPIKeyAuthenticationResultListener
-// MapView.CurrentLocationEventListener,
 		MapView.MapViewEventListener, MapView.POIItemEventListener {
 	private MapView mapView;
 	private Button tolist, mylocation;
@@ -59,9 +58,10 @@ public class MainActivity extends Activity implements
 	private ProgressDialog mPdProgress;
 
 	private boolean isThreadStatus = false;
-	private int threadCnt = 0;
 
-	GetJson getJson;
+	private GetJson getJson;
+	private Handler handler;
+	private Runnable runnable;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -71,32 +71,26 @@ public class MainActivity extends Activity implements
 		mapView = (MapView) findViewById(R.id.daumMapView);
 		mapView.setDaumMapApiKey("f401d2bb5e8f15928c99c68e0a71f43ea29fb2e0");
 		mapView.setMapViewEventListener(this);
-		// mapView.setOpenAPIKeyAuthenticationResultListener(this);
-		// mapView.setCurrentLocationEventListener(this);
 		mapView.setPOIItemEventListener(this);
 		mapView.setMapType(MapView.MapType.Standard);
 
 		tolist = (Button) findViewById(R.id.Tolist);
 		tolist.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
+				if (first_parsing == true && isThreadStatus == false) {
 
-				if (threadCnt > 1 && ListActivity.listActivity != null) {
-					threadCnt = 1;
-					ListActivity.listActivity.finish();
-				}
+					if (product_cnt == 0) {
+						Toast.makeText(MainActivity.this, "현 지역에 데이터가 없습니다",
+								Toast.LENGTH_SHORT).show();
+					} else {
+						Intent intent = new Intent(MainActivity.this,
+								ListActivity.class);
 
-				if (product_cnt == 0) {
-					Toast.makeText(MainActivity.this, "현 지역에 데이터가 없습니다",
-							Toast.LENGTH_SHORT).show();
+						intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 
-				} else if (first_parsing == true) {
-					Intent intent = new Intent(MainActivity.this,
-							ListActivity.class);
-
-					intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-
-					intent.putParcelableArrayListExtra("data", data);
-					startActivity(intent);
+						intent.putParcelableArrayListExtra("data", data);
+						startActivity(intent);
+					}
 				}
 			}
 		});
@@ -110,7 +104,7 @@ public class MainActivity extends Activity implements
 			}
 		});
 
-		// /////////////////location/////////////////////////
+		// location////////////////////////////////////////////////////////////////////
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) == false) {
 			Toast.makeText(this, "GPS 사용을 체크해주세요.", Toast.LENGTH_SHORT).show();
@@ -135,7 +129,6 @@ public class MainActivity extends Activity implements
 				mylongti = location.getLongitude();
 
 				if (first_parsing == false) {
-					first_parsing = true;
 					mapView.setZoomLevel(6, false);
 					user_location();
 					lowlati = mylati - X_RANGE;
@@ -143,23 +136,9 @@ public class MainActivity extends Activity implements
 					lowlongti = mylongti - Y_RANGE;
 					highlongti = mylongti + Y_RANGE;
 
-					getJson = new GetJson();
-					getJson.execute(mylati, mylongti);
+					parsing(mylati, mylongti);
 
-					Handler handler = new Handler();
-					handler.postDelayed(new Runnable() {
-						@Override
-						public void run() {
-							if (getJson.getStatus() == AsyncTask.Status.RUNNING) {
-								getJson.cancel(true);
-								mPdProgress.dismiss();
-								Toast toast = Toast.makeText(MainActivity.this,
-										"네트워크가 불안정합니다", Toast.LENGTH_SHORT);
-								toast.show();
-							}
-						}
-					}, 7000);
-
+					first_parsing = true;
 				}
 			}
 
@@ -179,14 +158,9 @@ public class MainActivity extends Activity implements
 				LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
 	}
 
+	// GetJson/////////////////////////////////////////////////////////////////////
 	private class GetJson extends AsyncTask<Object, String, JSONArray> {
-
-		@Override
 		protected void onPreExecute() {
-			super.onPreExecute();
-
-			isThreadStatus = true;
-			threadCnt++;
 			mPdProgress = new ProgressDialog(MainActivity.this);
 			mPdProgress.setMessage("Loading...");
 			mPdProgress.setIndeterminate(true);
@@ -195,7 +169,6 @@ public class MainActivity extends Activity implements
 			mPdProgress.show();
 		}
 
-		@Override
 		protected JSONArray doInBackground(Object... arg0) {
 			// TODO Auto-generated method stub
 			try {
@@ -206,8 +179,8 @@ public class MainActivity extends Activity implements
 						"http://202.31.139.172:9092/index.php/mobile2/json/"
 								+ Double.toString((Double) arg0[0]) + "/"
 								+ Double.toString((Double) arg0[1]) + "/"
-								+ Double.toString(X_RANGE+0.01) + "/"
-								+ Double.toString(Y_RANGE+0.01));
+								+ Double.toString(X_RANGE + 0.01) + "/"
+								+ Double.toString(Y_RANGE + 0.01));
 				// Execute the request in the client
 				HttpResponse httpResponse = defaultClient
 						.execute(httpGetRequest);
@@ -218,21 +191,15 @@ public class MainActivity extends Activity implements
 				String json = reader.readLine();
 				jsonArray = new JSONArray(json);
 				return jsonArray;
-
 			} catch (Exception e) {
 				Log.e("log_tag", "Error in http connection " + e.toString());
 			}
-
 			return null;
-
 		}
 
-		@Override
 		protected void onPostExecute(JSONArray jsonArray) {
-			super.onPostExecute(jsonArray);
 
 			product_cnt = jsonArray.length();
-			data = null;
 			data = new ArrayList<Data>();
 
 			try {
@@ -250,8 +217,8 @@ public class MainActivity extends Activity implements
 											.getString("y")));
 
 					data.add(p_data);
-
 				}
+
 				MapPoint p = mapView.getMapCenterPoint();
 				int zoomlvl = mapView.getZoomLevel();
 				show_mark();
@@ -263,12 +230,31 @@ public class MainActivity extends Activity implements
 
 			mPdProgress.dismiss();
 			isThreadStatus = false;
-
+			handler.removeCallbacks(runnable);
 		}
-
 	}
 
-	///////////////////////////////////user_function///////////////////////////////
+	// user_function/////////////////////////////////////////////////////////////////////
+	public void parsing(double lati, double longti) {
+		isThreadStatus = true;
+		getJson = new GetJson();
+		getJson.execute(lati, longti);
+
+		handler = new Handler();
+		handler.postDelayed(runnable = new Runnable() {
+			public void run() {
+				if (isThreadStatus == true) {
+					getJson.cancel(true);
+					mPdProgress.dismiss();
+					Toast toast = Toast.makeText(MainActivity.this,
+							"네트워크가 불안정합니다", Toast.LENGTH_SHORT);
+					toast.show();
+					isThreadStatus = false;
+				}
+			}
+		}, 7000);
+	}
+
 	public void user_location() {
 		mapView.setMapCenterPoint(
 				MapPoint.mapPointWithGeoCoord(mylati, mylongti), true);
@@ -287,14 +273,12 @@ public class MainActivity extends Activity implements
 			mapView.addPOIItem(poiItem[i]);
 		}
 		user_marker(mylati, mylongti);
-
 		mapView.fitMapViewAreaToShowAllPOIItems();
 	}
 
 	public void user_marker(double lati, double longti) {
 
 		MapPOIItem poi_user = new MapPOIItem();
-
 		poi_user.setItemName("현위치");
 		poi_user.setMapPoint(MapPoint.mapPointWithGeoCoord(lati, longti));
 		poi_user.setMarkerType(MapPOIItem.MarkerType.CustomImage);
@@ -303,7 +287,7 @@ public class MainActivity extends Activity implements
 		mapView.addPOIItem(poi_user);
 	}
 
-	////////////////MapView.MapViewEventListener///////////////////
+	// MapView.MapViewEventListener/////////////////////////////////////////////
 	@Override
 	public void onMapViewCenterPointMoved(MapView arg0, MapPoint arg1) {
 		if (first_parsing == true) {
@@ -318,10 +302,9 @@ public class MainActivity extends Activity implements
 				highlongti = maplongti + Y_RANGE;
 
 				if (isThreadStatus == false)
-					new GetJson().execute(maplati, maplongti);
+					parsing(maplati, maplongti);
 
 			}
-
 		}
 	}
 
@@ -345,7 +328,7 @@ public class MainActivity extends Activity implements
 	public void onMapViewZoomLevelChanged(MapView arg0, int arg1) {
 	}
 
-	///////////////////POIItemEventListener///////////////////
+	// POIItemEventListener///////////////////////////////////////////////////
 	@Override
 	public void onCalloutBalloonOfPOIItemTouched(MapView arg0, MapPOIItem arg1) {
 		Uri uri = Uri.parse(data.get(arg1.getTag()).gethref());

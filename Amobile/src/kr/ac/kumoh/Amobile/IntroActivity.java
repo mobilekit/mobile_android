@@ -1,12 +1,13 @@
 package kr.ac.kumoh.Amobile;
 
-import android.app.*;
-import android.content.*;
-import android.os.*;
-
-import android.view.animation.*;
-import android.view.animation.Animation.*;
-import android.widget.*;
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
+import android.widget.ImageView;
 
 public class IntroActivity extends Activity {
 	/** Called when the activity is first created. */

@@ -15,10 +15,9 @@ import android.widget.ListView;
 
 public class ListActivity extends Activity implements OnItemClickListener {
 
-	private ArrayList<Data> data;
-	private MyAdapter adapter;
-	private ListView listView;
-
+	private ArrayList<Data> datalist;
+	private ListView listView = null;
+	private MyAdapter adapter = null;
 	public static ListActivity listActivity;
 
 	@Override
@@ -26,7 +25,6 @@ public class ListActivity extends Activity implements OnItemClickListener {
 		super.onCreate(savedInstanceState);
 
 		listActivity = this;
-
 		setContentView(R.layout.activity_list);
 
 		Button tomap = (Button) findViewById(R.id.Tomap);
@@ -34,19 +32,17 @@ public class ListActivity extends Activity implements OnItemClickListener {
 			public void onClick(View v) {
 				Intent intent = new Intent(ListActivity.this,
 						MainActivity.class);
-
 				intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-
 				startActivity(intent);
 
 			}
 		});
 
 		Intent intent = getIntent();
-		data = intent.getParcelableArrayListExtra("data");
+		datalist = intent.getParcelableArrayListExtra("data");
 
 		listView = (ListView) findViewById(R.id.ListView1);
-		adapter = new MyAdapter(this, R.layout.datalist, data);
+		adapter = new MyAdapter(this, R.layout.datalist, datalist, listView);
 		listView.setAdapter(adapter);
 		listView.setOnItemClickListener(this);
 
@@ -56,7 +52,7 @@ public class ListActivity extends Activity implements OnItemClickListener {
 	public void onItemClick(AdapterView<?> arg0, View arg1, int position,
 			long id) {
 
-		String href = data.get(position).gethref();
+		String href = datalist.get(position).gethref();
 		Uri urihref = Uri.parse(href);
 		Intent intent = new Intent(Intent.ACTION_VIEW, urihref);
 		startActivity(intent);
