@@ -16,8 +16,8 @@
 
         <ImageView
             android:id="@+id/list_row_photo"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="100dip"
+            android:layout_height="100dip"
             android:layout_gravity="center"
             />
 

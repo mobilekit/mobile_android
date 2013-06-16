@@ -9,6 +9,7 @@ import java.util.ArrayList;
 
 import android.content.Context;
 import android.graphics.BitmapFactory;
+
 import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +26,7 @@ class MyAdapter extends ArrayAdapter<Data> {
 	private ArrayList<Data> datalist;
 	private ListView listView ;
 	private LayoutInflater inflater;
+	private ArrayList<GetImage> asynclist ;
 
 	public MyAdapter(Context _context, int _layoutId, ArrayList<Data> _Datalist, ListView _listView) {
 		super(_context, _layoutId, _Datalist);
@@ -34,6 +36,7 @@ class MyAdapter extends ArrayAdapter<Data> {
 		listView = _listView;
 		inflater = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		asynclist = new ArrayList<GetImage>();
 	}
 
 
@@ -46,7 +49,7 @@ class MyAdapter extends ArrayAdapter<Data> {
 			TextView price2;
 		}
 		ViewHolder vh = null;
-
+		
 		Data data;
 		data = datalist.get(position);
 
@@ -66,7 +69,10 @@ class MyAdapter extends ArrayAdapter<Data> {
 		}
 
 		if (data.getbmp() == null) {
-			new GetImage().execute(data, vh.photo);
+			GetImage getImage = new GetImage();
+			getImage.execute(data, vh.photo);
+			asynclist.add(getImage);
+			
 			vh.photo.setImageBitmap(data.getbmp());
 		} else {
 			vh.photo.setImageBitmap(data.getbmp());
@@ -95,7 +101,6 @@ class MyAdapter extends ArrayAdapter<Data> {
 				is = connection.getInputStream();
 				data.setbmp(BitmapFactory.decodeStream(is));
 				is.close();
-
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
@@ -106,6 +111,14 @@ class MyAdapter extends ArrayAdapter<Data> {
 
 		protected void onPostExecute(View photo) {
 			listView.invalidateViews();
+		}
+		
+	}
+	public void cancel_async(){
+		for(int i = 0 ; i < asynclist.size(); i ++)
+		{
+			if(asynclist.get(i).getStatus() == AsyncTask.Status.RUNNING)
+				asynclist.get(i).cancel(true);	
 		}
 	}
 }

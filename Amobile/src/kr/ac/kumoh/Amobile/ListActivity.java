@@ -34,7 +34,6 @@ public class ListActivity extends Activity implements OnItemClickListener {
 						MainActivity.class);
 				intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 				startActivity(intent);
-
 			}
 		});
 
@@ -56,6 +55,12 @@ public class ListActivity extends Activity implements OnItemClickListener {
 		Uri urihref = Uri.parse(href);
 		Intent intent = new Intent(Intent.ACTION_VIEW, urihref);
 		startActivity(intent);
+	}
+	
+	@Override
+	protected void onPause(){
+		super.onPause();
+		adapter.cancel_async();
 	}
 
 }
