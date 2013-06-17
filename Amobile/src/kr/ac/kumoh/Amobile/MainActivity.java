@@ -97,6 +97,8 @@ public class MainActivity extends Activity implements
 			public void onClick(View v) {
 				if (first_parsing == true) {
 					user_location();
+					if (isThreadStatus == false)
+						parsing(mylati, mylongti);
 				}
 			}
 		});
@@ -128,11 +130,6 @@ public class MainActivity extends Activity implements
 				if (first_parsing == false) {
 					mapView.setZoomLevel(6, false);
 					user_location();
-					lowlati = mylati - X_RANGE;
-					highlati = mylati + X_RANGE;
-					lowlongti = mylongti - Y_RANGE;
-					highlongti = mylongti + Y_RANGE;
-
 					parsing(mylati, mylongti);
 
 					first_parsing = true;
@@ -230,6 +227,11 @@ public class MainActivity extends Activity implements
 
 	// user_function/////////////////////////////////////////////////////////////////////
 	public void parsing(double lati, double longti) {
+		lowlati = lati - X_RANGE;
+		highlati = lati + X_RANGE;
+		lowlongti = longti - Y_RANGE;
+		highlongti = longti + Y_RANGE;
+		
 		isThreadStatus = true;
 		getJson = new GetJson();
 		getJson.execute(lati, longti);
@@ -290,10 +292,6 @@ public class MainActivity extends Activity implements
 
 			if (maplati < lowlati || maplati > highlati
 					|| maplongti < lowlongti || maplongti > highlongti) {
-				lowlati = maplati - X_RANGE;
-				highlati = maplati + X_RANGE;
-				lowlongti = maplongti - Y_RANGE;
-				highlongti = maplongti + Y_RANGE;
 
 				if (isThreadStatus == false)
 					parsing(maplati, maplongti);
