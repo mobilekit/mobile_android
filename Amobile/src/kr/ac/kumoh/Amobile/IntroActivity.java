@@ -10,7 +10,7 @@ import android.view.animation.Animation.AnimationListener;
 import android.widget.ImageView;
 
 public class IntroActivity extends Activity {
-	/** Called when the activity is first created. */
+	///** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -36,13 +36,12 @@ public class IntroActivity extends Activity {
 					public void run() {
 						startActivity(new Intent(IntroActivity.this,
 								MainActivity.class));
-
 						finish();
 					}
-				}, 3000);
+				}, 1500);
 			}
 		});
-		an.setDuration(5000);
+		an.setDuration(1000);
 		ImageView introImage = (ImageView) findViewById(R.id.IntroImage);
 		introImage.setAnimation(an);
 	}

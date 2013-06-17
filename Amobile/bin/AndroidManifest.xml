@@ -8,11 +8,11 @@
         android:minSdkVersion="8"
         android:targetSdkVersion="17" />
 
-    <uses-permission android:name="android.permission.INTERNET">
+    <uses-permission android:name="android.permission.INTERNET" >
     </uses-permission>
-	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION">    
-	</uses-permission>
-	
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" >
+    </uses-permission>
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/yogi_icon"
@@ -20,9 +20,9 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name="kr.ac.kumoh.Amobile.IntroActivity"
-            android:label="@string/app_name" 
-             android:theme="@android:style/Theme.NoTitleBar">
-             <intent-filter>
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.NoTitleBar" >
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -30,17 +30,14 @@
         </activity>
         <activity
             android:name="kr.ac.kumoh.Amobile.MainActivity"
-            android:label="@string/app_name" 
-             android:theme="@android:style/Theme.NoTitleBar">
-            
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.NoTitleBar" >
         </activity>
         <activity
             android:name="kr.ac.kumoh.Amobile.ListActivity"
-            android:label="@string/title_activity_list" 
-             android:theme="@android:style/Theme.NoTitleBar">
+            android:label="@string/title_activity_list"
+            android:theme="@android:style/Theme.NoTitleBar" >
         </activity>
     </application>
-    
-  
 
 </manifest>

@@ -85,9 +85,6 @@ public class MainActivity extends Activity implements
 					} else {
 						Intent intent = new Intent(MainActivity.this,
 								ListActivity.class);
-
-						intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-
 						intent.putParcelableArrayListExtra("data", data);
 						startActivity(intent);
 					}
@@ -108,9 +105,9 @@ public class MainActivity extends Activity implements
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) == false) {
 			Toast.makeText(this, "GPS 사용을 체크해주세요.", Toast.LENGTH_SHORT).show();
-			startActivityForResult(new Intent(
-					android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS),
-					0);
+			Intent intent = new Intent(
+					android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+			startActivity(intent);
 		}
 
 		criteria = new Criteria();
@@ -170,21 +167,18 @@ public class MainActivity extends Activity implements
 		}
 
 		protected JSONArray doInBackground(Object... arg0) {
-			// TODO Auto-generated method stub
 			try {
-				// Create a new HTTP Client
 				DefaultHttpClient defaultClient = new DefaultHttpClient();
-				// Setup the get request
 				HttpGet httpGetRequest = new HttpGet(
 						"http://202.31.139.172:9092/index.php/mobile2/json/"
 								+ Double.toString((Double) arg0[0]) + "/"
 								+ Double.toString((Double) arg0[1]) + "/"
 								+ Double.toString(X_RANGE + 0.01) + "/"
 								+ Double.toString(Y_RANGE + 0.01));
-				// Execute the request in the client
+
 				HttpResponse httpResponse = defaultClient
 						.execute(httpGetRequest);
-				// Grab the response
+
 				BufferedReader reader = new BufferedReader(
 						new InputStreamReader(httpResponse.getEntity()
 								.getContent(), "UTF-8"));

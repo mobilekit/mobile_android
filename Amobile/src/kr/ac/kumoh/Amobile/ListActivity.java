@@ -18,22 +18,17 @@ public class ListActivity extends Activity implements OnItemClickListener {
 	private ArrayList<Data> datalist;
 	private ListView listView = null;
 	private MyAdapter adapter = null;
-	public static ListActivity listActivity;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		listActivity = this;
 		setContentView(R.layout.activity_list);
 
 		Button tomap = (Button) findViewById(R.id.Tomap);
 		tomap.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				Intent intent = new Intent(ListActivity.this,
-						MainActivity.class);
-				intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-				startActivity(intent);
+				onPause();
 			}
 		});
 
@@ -56,11 +51,12 @@ public class ListActivity extends Activity implements OnItemClickListener {
 		Intent intent = new Intent(Intent.ACTION_VIEW, urihref);
 		startActivity(intent);
 	}
-	
+
 	@Override
-	protected void onPause(){
+	protected void onPause() {
 		super.onPause();
 		adapter.alloff_async();
+		finish();
 	}
 
 }

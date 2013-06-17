@@ -24,12 +24,12 @@ class MyAdapter extends ArrayAdapter<Data> {
 	private Context context;
 	private int layoutId;
 	private ArrayList<Data> datalist;
-	private ListView listView ;
+	private ListView listView;
 	private LayoutInflater inflater;
-	//private ArrayList<GetImage> asynclist ;
-	private GetImage[] asynclist ;
+	private GetImage[] asynclist;
 
-	public MyAdapter(Context _context, int _layoutId, ArrayList<Data> _Datalist, ListView _listView) {
+	public MyAdapter(Context _context, int _layoutId,
+			ArrayList<Data> _Datalist, ListView _listView) {
 		super(_context, _layoutId, _Datalist);
 		context = _context;
 		layoutId = _layoutId;
@@ -37,10 +37,8 @@ class MyAdapter extends ArrayAdapter<Data> {
 		listView = _listView;
 		inflater = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		//asynclist = new ArrayList<GetImage>();
 		asynclist = new GetImage[datalist.size()];
 	}
-
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
@@ -51,7 +49,7 @@ class MyAdapter extends ArrayAdapter<Data> {
 			TextView price2;
 		}
 		ViewHolder vh = null;
-		
+
 		Data data;
 		data = datalist.get(position);
 
@@ -115,26 +113,23 @@ class MyAdapter extends ArrayAdapter<Data> {
 		protected void onPostExecute(Void unused) {
 			listView.invalidateViews();
 		}
-		
+
 	}
-	public void alloff_async(){
-		/*for(int i = 0 ; i < asynclist.size(); i ++)
-		{
-			if(asynclist.get(i).getStatus() == AsyncTask.Status.RUNNING)
-				asynclist.get(i).cancel(true);	
+
+	public void alloff_async() {
+
+		for (int i = 0; i < asynclist.length; i++) {
+			if (asynclist[i] != null)
+				if (asynclist[i].getStatus() == AsyncTask.Status.RUNNING)
+					asynclist[i].cancel(true);
 		}
-		*/
-		for(int i = 0 ; i < datalist.size(); i ++)
-		{
-			if(asynclist[i].getStatus() == AsyncTask.Status.RUNNING)
-				asynclist[i].cancel(true);
-		}
+
 	}
 
 	public void stop_async(int position) {
 		int up_posi = position - 4;
-		int down_posi = position + 4 ;
-		
+		int down_posi = position + 4;
+
 		if (up_posi >= 0 && asynclist[up_posi] != null)
 			if (asynclist[up_posi].getStatus() == AsyncTask.Status.RUNNING)
 				asynclist[up_posi].cancel(true);
@@ -142,6 +137,7 @@ class MyAdapter extends ArrayAdapter<Data> {
 		if (down_posi < datalist.size() && asynclist[down_posi] != null)
 			if (asynclist[down_posi].getStatus() == AsyncTask.Status.RUNNING)
 				asynclist[down_posi].cancel(true);
+
 	}
 
 }
