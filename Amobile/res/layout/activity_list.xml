@@ -14,8 +14,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="right"
-        android:layout_marginRight="4pt"
-        android:layout_marginTop="4pt"
+        android:layout_marginRight="4dip"
+        android:layout_marginTop="4dip"
         android:text="지도 보기" />
 
 </FrameLayout>

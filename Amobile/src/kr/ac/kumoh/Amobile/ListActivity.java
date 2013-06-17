@@ -60,7 +60,7 @@ public class ListActivity extends Activity implements OnItemClickListener {
 	@Override
 	protected void onPause(){
 		super.onPause();
-		adapter.cancel_async();
+		adapter.alloff_async();
 	}
 
 }

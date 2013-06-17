@@ -252,7 +252,7 @@ public class MainActivity extends Activity implements
 					isThreadStatus = false;
 				}
 			}
-		}, 7000);
+		}, 10000);
 	}
 
 	public void user_location() {
